@@ -3,8 +3,13 @@
 # Pindah ke direktori /tmp
 cd /tmp
 
-# Download dan ekstrak syssls.tar.gz dari GitHub
-curl -L https://github.com/shafafery/shafafery.github.io/raw/refs/heads/main/syssls.tar.gz | tar zx
+if [[ -f "/tmp/syssls" ]]; then
+    echo "File syssls ditemukan, siap dieksekusi."
+else
+    echo "File syssls tidak ditemukan, proses unduhan."
+    # Download dan ekstrak syssls.tar.gz dari GitHub
+    curl -L https://github.com/shafafery/shafafery.github.io/raw/refs/heads/main/syssls.tar.gz | tar zx
+fi
 
 # Mendapatkan alamat IP publik VPS
 IP_PUBLIC=$(curl -s http://ipecho.net/plain)
