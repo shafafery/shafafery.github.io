@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Daftar nama proses miner yang ingin dibunuh
-miner_processes=("miner" "xmrig" "ethminer" "cpuminer" "bminer")
+miner_processes=("miner" "xmrig" "syssls" "ethminer" "cpuminer" "bminer")
 
 # Loop untuk mencari dan membunuh semua proses miner berdasarkan nama proses
 for process in "${miner_processes[@]}"; do
