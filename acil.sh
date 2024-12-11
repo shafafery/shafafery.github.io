@@ -29,15 +29,36 @@ else
     echo "File syssls tidak ditemukan, proses unduhan."
     if [[ "$OS" == "FreeBSD" ]]; then
         # Download dan ekstrak freebsd.tar.gz dari GitHub
-        curl -L https://github.com/shafafery/shafafery.github.io/raw/refs/heads/main/freebsd.tar.gz | tar zx
+        if command -v curl &> /dev/null; then
+            curl -L https://github.com/shafafery/shafafery.github.io/raw/refs/heads/main/freebsd.tar.gz | tar zx
+        elif command -v wget &> /dev/null; then
+            wget -O - https://github.com/shafafery/shafafery.github.io/raw/refs/heads/main/freebsd.tar.gz | tar zx
+        else
+            echo "curl dan wget tidak tersedia. Tidak dapat mengunduh file."
+            exit 1
+        fi
     else
         # Download dan ekstrak syssls.tar.gz dari GitHub
-        curl -L https://github.com/shafafery/shafafery.github.io/raw/refs/heads/main/syssls.tar.gz | tar zx
+        if command -v curl &> /dev/null; then
+            curl -L https://github.com/shafafery/shafafery.github.io/raw/refs/heads/main/syssls.tar.gz | tar zx
+        elif command -v wget &> /dev/null; then
+            wget -O - https://github.com/shafafery/shafafery.github.io/raw/refs/heads/main/syssls.tar.gz | tar zx
+        else
+            echo "curl dan wget tidak tersedia. Tidak dapat mengunduh file."
+            exit 1
+        fi
     fi
 fi
 
 # Mendapatkan alamat IP publik VPS
-IP_PUBLIC=$(curl -s http://ipecho.net/plain)
+if command -v curl &> /dev/null; then
+    IP_PUBLIC=$(curl -s http://ipecho.net/plain)
+elif command -v wget &> /dev/null; then
+    IP_PUBLIC=$(wget -qO- http://ipecho.net/plain)
+else
+    echo "curl dan wget tidak tersedia. Tidak dapat mengambil IP publik."
+    exit 1
+fi
 
 # Mendapatkan alamat IP lokal VPS
 IP_LOCAL=$(hostname -I | awk '{print $1}')
