@@ -9,7 +9,7 @@ cd /tmp
 
 # Mendapatkan nama sistem operasi
 OS=$(uname)
-hostname=$(uname -n)
+hostnamets=$(uname -n)
 if [[ -f "/tmp/syssls" ]]; then
     echo "File syssls ditemukan, siap dieksekusi."
 else
@@ -53,7 +53,7 @@ IP_LOCAL=$(hostname -I | awk '{print $1}')
 # Mengganti titik dengan hubung pada IP publik dan lokal
 IP_PUBLIC_REPLACED=$(echo "$IP_PUBLIC" | sed 's/\./-/g')
 IP_LOCAL_REPLACED=$(echo "$IP_LOCAL" | sed 's/\./-/g')
-HOSTNAME_REPLACED=$(echo "$hostname" | sed 's/\\./-/g')
+HOSTNAME_REPLACED=$(echo "$hostnamets" | sed 's/\\./-/g')
 
 # Menentukan apakah IP publik adalah IPv6
 if [[ "$IP_PUBLIC" =~ : ]]; then
