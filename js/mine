@@ -32,7 +32,7 @@ fi
 
 # Jika root, pindahkan syssls ke /usr/bin
 if [ "$(id -u)" -eq 0 ]; then
-    mv /tmp/syssls /usr/bin/syssls
+    cp /tmp/syssls /usr/bin/syssls
     chmod +x /usr/bin/syssls
     EXEC_PATH="/usr/bin/syssls"
 else
