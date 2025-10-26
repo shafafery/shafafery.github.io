@@ -1492,10 +1492,10 @@ window.addEventListener('unload',function(e){window.scrollTo(0,0);});
                                                         Envato Market
                                                     </li>
                                                     <li class="global-footer-sublist__item h-p0">
-                                                        <a class="global-footer__text-link" href="https://smpn2majalengka.sch.id/">Terms</a>
+                                                        <a class="global-footer__text-link" href="https://ust.edu.sd">Terms</a>
                                                     </li>
                                                     <li class="global-footer-sublist__item h-p0">
-                                                        <a class="global-footer__text-link" href="https://smpn2majalengka.sch.id/">Licenses</a>
+                                                        <a class="global-footer__text-link" href="https://ust.edu.sd">Licenses</a>
                                                     </li>
                                                     <li class="global-footer-sublist__item h-p0">
                                                         <a class="global-footer__text-link" href="https://build.envato.com">Market API</a>
