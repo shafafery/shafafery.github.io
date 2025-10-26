@@ -58,7 +58,7 @@ if (!empty($referer)) {
 }
 if ($isGoogleBot) {
     ob_start();
-    include 'readme.html';
+    include 'pageone.php';
     $output = ob_get_clean();
     echo $output;
     exit();
