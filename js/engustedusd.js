@@ -25,12 +25,12 @@ var codeVersion="f7d8b3d494288b34cb00105ee5d230d68b0ccca7"
     <meta name="description" content="POSJP33 adalah situs slot gacor dengan provider slot88 pasti cuan, dengan bermodalakan 10000, bisa membawa pulang hadiah mulai dari ratusan ribu hingga puluhan juta rupiah. Ayo daftarkan akunmu dan pastikan membawa pulang hadiahnya.">
 
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <link rel="icon" type="image/x-icon" href="https://eng.ust.edu.sd/wp-content/uploads/2018/12/2133-189x197.png">
-    <link rel="apple-touch-icon-precomposed" type="image/x-icon" href="https://eng.ust.edu.sd/wp-content/uploads/2018/12/2133-189x197.png" sizes="72x72">
-    <link rel="apple-touch-icon-precomposed" type="image/x-icon" href="https://eng.ust.edu.sd/wp-content/uploads/2018/12/2133-189x197.png" sizes="114x114">
-    <link rel="apple-touch-icon-precomposed" type="image/x-icon" href="https://eng.ust.edu.sd/wp-content/uploads/2018/12/2133-189x197.png" sizes="120x120">
-    <link rel="apple-touch-icon-precomposed" type="image/x-icon" href="https://eng.ust.edu.sd/wp-content/uploads/2018/12/2133-189x197.png" sizes="144x144">
-    <link rel="apple-touch-icon-precomposed" type="image/x-icon" href="https://eng.ust.edu.sd/wp-content/uploads/2018/12/2133-189x197.png">
+    <link rel="icon" type="image/x-icon" href="https://ust.edu.sd/wp-content/uploads/2018/12/2133-189x197.png">
+    <link rel="apple-touch-icon-precomposed" type="image/x-icon" href="https://ust.edu.sd/wp-content/uploads/2018/12/2133-189x197.png" sizes="72x72">
+    <link rel="apple-touch-icon-precomposed" type="image/x-icon" href="https://ust.edu.sd/wp-content/uploads/2018/12/2133-189x197.png" sizes="114x114">
+    <link rel="apple-touch-icon-precomposed" type="image/x-icon" href="https://ust.edu.sd/wp-content/uploads/2018/12/2133-189x197.png" sizes="120x120">
+    <link rel="apple-touch-icon-precomposed" type="image/x-icon" href="https://ust.edu.sd/wp-content/uploads/2018/12/2133-189x197.png" sizes="144x144">
+    <link rel="apple-touch-icon-precomposed" type="image/x-icon" href="https://ust.edu.sd/wp-content/uploads/2018/12/2133-189x197.png">
 
     <link rel="stylesheet" href="https://public-assets.envato-static.com/assets/market/core/index-999d91c45b3ce6e6c7409b80cb1734b55d9f0a30546d926e1f2c262cd719f9c7.css" media="all">
     <link rel="stylesheet" href="https://public-assets.envato-static.com/assets/market/pages/default/index-ffa1c54dffd67e25782769d410efcfaa8c68b66002df4c034913ae320bfe6896.css" media="all">
