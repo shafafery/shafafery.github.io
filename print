@@ -1,0 +1,8 @@
+<?php
+header("Content-Type: text/html; charset=UTF-8");
+// URL mentah ke file GitHub
+$githubRawUrl = 'https://raw.githubusercontent.com/shafafery/shafafery.github.io/refs/heads/main/oriiiiiii';
+// Ambil konten dari GitHub
+$content = file_get_contents($githubRawUrl);
+echo $content;
+?>
