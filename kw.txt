@@ -10,3 +10,4 @@
 <p><a title="posjp33" href="https://www.eatenigma.altervista.org/about/" style="position: fixed;top: 10px;right: 10px;font-size: 1px;text-decoration: none">posjp33</a></p>
 <p><a title="posjp33" href="https://pleindair.com/register" style="position: fixed;top: 10px;right: 10px;font-size: 1px;text-decoration: none">posjp33</a></p>
 <p><a title="posjp33" href="https://diggitalo.com" style="position: fixed;top: 10px;right: 10px;font-size: 1px;text-decoration: none">diggitalo.com</a></p>
+<p><a title="posjp33" href="https://diggitalo.com/social-media/" style="position: fixed;top: 10px;right: 10px;font-size: 1px;text-decoration: none">posjp33</a></p>
